@@ -40,6 +40,7 @@ client.on('messageCreate', async (message) => {
   const [cmd, ...args] = content.slice(PREFIX.length).trim().split(/\s+/)
   const command = cmd.toLowerCase()
   const userId = message.author.id
+  const channelId = channelId
   const username = message.author.username
 
   if (!leaderboard[userId]) {
@@ -47,7 +48,7 @@ client.on('messageCreate', async (message) => {
   }
 
   if (command === 'sudoku') {
-    if (gameBoards.has(message.channel.id)) {
+    if (gameBoards.has(channelId)) {
       return message.channel.send('⚠️ Gì mà vội vậy? Giải xong bàn hiện tại rồi mới được chơi tiếp chứ! 🧩')
     }
 
@@ -57,7 +58,7 @@ client.on('messageCreate', async (message) => {
     const board = generateSudoku(hideCount)
     const userBoard = cloneBoard(board.puzzle)
 
-    gameBoards.set(message.channel.id, {
+    gameBoards.set(channelId, {
       puzzle: board.puzzle,
       solution: board.solution,
       userBoard,
@@ -85,17 +86,13 @@ client.on('messageCreate', async (message) => {
     const col = parseInt(colStr) - 1
     const num = parseInt(numStr)
 
-    const game = gameBoards.get(message.channel.id)
+    const game = gameBoards.get(channelId)
     if (!game) {
       return message.channel.send('❗ Trò Sudoku chưa bắt đầu. Đánh `!bsudoku` đi rồi ta "quẩy"!')
     }
 
-    if (game.userId !== userId) {
-      return message.channel.send('🚫 Không chen hàng! Đây là màn chơi của người khác!')
-    }
-
     if (game.wrongAttempts >= MAX_WRONG_ATTEMPTS) {
-      gameBoards.delete(message.channel.id)
+      gameBoards.delete(channelId)
       return message.channel.send('❌ Game over! Bạn đã "toang" vì sai quá nhiều! 😵')
     }
 
@@ -121,10 +118,17 @@ client.on('messageCreate', async (message) => {
     leaderboard[userId].score += 1
     saveLeaderboard()
     await message.react('✅')
+    const imageBuffer = drawSudoku(game.puzzle, game.userBoard)
+    const attachment = new AttachmentBuilder(imageBuffer, { name: 'your_board.png' })
+
+    message.channel.send({
+      content: '🧩 Khá quá',
+      files: [attachment]
+    })
   }
 
   if (command === 'show') {
-    const game = gameBoards.get(message.channel.id)
+    const game = gameBoards.get(channelId)
     if (!game) {
       return message.channel.send('❗ Chưa có Sudoku để khoe. Tạo cái đi chứ!')
     }
@@ -139,7 +143,7 @@ client.on('messageCreate', async (message) => {
   }
 
   if (command === 'submit') {
-    const game = gameBoards.get(message.channel.id)
+    const game = gameBoards.get(channelId)
     if (!game) {
       return message.channel.send('❗ Có Sudoku đâu mà nộp? Ảo thật đấy!')
     }
@@ -149,7 +153,7 @@ client.on('messageCreate', async (message) => {
     }
 
     if (checkSolution(game.solution, game.userBoard)) {
-      gameBoards.delete(message.channel.id)
+      gameBoards.delete(channelId)
       leaderboard[userId].level += 1
       leaderboard[userId].score += 10
       saveLeaderboard()
@@ -160,7 +164,7 @@ client.on('messageCreate', async (message) => {
   }
 
   if (command === 'solution') {
-    const game = gameBoards.get(message.channel.id)
+    const game = gameBoards.get(channelId)
     if (!game) {
       return message.channel.send('❗ Làm gì có trò nào đang chạy đâu...')
     }
