@@ -40,7 +40,7 @@ client.on('messageCreate', async (message) => {
   const [cmd, ...args] = content.slice(PREFIX.length).trim().split(/\s+/)
   const command = cmd.toLowerCase()
   const userId = message.author.id
-  const channelId = channelId
+  const channelId = message.channel.id
   const username = message.author.username
 
   if (!leaderboard[userId]) {
