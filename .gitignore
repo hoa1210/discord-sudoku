@@ -1,0 +1,20 @@
+# Bỏ qua thư mục cài đặt Node.js
+node_modules/
+
+# Bỏ qua file chứa biến môi trường (token bot, API key)
+.env
+
+# Bỏ file log, cache, tạm thời
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+dist/
+.cache/
+.DS_Store
+
+# Nếu có VSCode
+.vscode/
+
+# Nếu dùng hệ điều hành Linux/Unix
+*.swp
