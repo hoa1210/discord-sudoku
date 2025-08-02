@@ -18,3 +18,5 @@ dist/
 
 # Nếu dùng hệ điều hành Linux/Unix
 *.swp
+
+leaderboard.json*
